@@ -14,7 +14,7 @@ from video_player_web.utils.py_get_ip import get_ip
 def main():
     port = 8000
     try:
-        port = int(os.environ.get('VIDEO_PLAYER_PORT', sys.argv[1] if len(sys.argv) > 1 else 80))
+        port = int(os.environ.get('VIDEO_PLAYER_PORT', sys.argv[1] if len(sys.argv) > 1 else 8000))
     except Exception:
         port = 8000
 
