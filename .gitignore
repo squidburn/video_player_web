@@ -1,6 +1,15 @@
-test/
+# Python
 __pycache__/
+*.py[cod]
+*.log
+
+# Virtual environment
 .venv/
-video_player_web.spec
+
+# PyInstaller
 build/
 dist/
+*.spec
+
+# VS Code
+.vscode/.history/

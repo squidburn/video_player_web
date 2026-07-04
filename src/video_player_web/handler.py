@@ -1,12 +1,16 @@
-import include.py_get_ip as get_ip
-import os, re, socket, html
+import html
+import os
+import re
+import socket
+import sys
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from socketserver import ThreadingMixIn
-import socket
+
 
 class MediaHandler(SimpleHTTPRequestHandler):
-    def log_message(self, format, *args): pass
-    
+    def log_message(self, format, *args):
+        pass
+
     def list_directory(self, path):
         try:
             list_dir = os.listdir(path)
@@ -17,8 +21,6 @@ class MediaHandler(SimpleHTTPRequestHandler):
         list_dir.sort(key=lambda a: (not os.path.isdir(os.path.join(path, a)), a.lower()))
 
         displaypath = html.escape(self.path)
-
-        # 构造列表项 HTML
         items = []
         for name in list_dir:
             fullname = os.path.join(path, name)
@@ -28,16 +30,24 @@ class MediaHandler(SimpleHTTPRequestHandler):
             items.append(f'<li><a href="{href}"><span class="icon">{icon}</span>{html.escape(name)}</a></li>')
         items_html = '\n'.join(items)
 
-        # 从模板加载页面（模板保存在 src/templates/list_directory.html）
-        tpl_path = os.path.join(os.path.dirname(__file__), 'templates', 'list_directory.html')
+        base_path = getattr(sys, '_MEIPASS', os.path.dirname(__file__))
+        candidates = [
+            os.path.join(base_path, 'templates', 'list_directory.html'),
+            os.path.join(base_path, 'video_player_web', 'templates', 'list_directory.html'),
+            os.path.join(os.path.dirname(__file__), 'templates', 'list_directory.html'),
+        ]
+        tpl_path = next((p for p in candidates if os.path.exists(p)), None)
+        if tpl_path is None:
+            raise FileNotFoundError("Template file not found: list_directory.html")
+
         with open(tpl_path, 'r', encoding='utf-8') as f:
             tpl = f.read()
         content = tpl.replace('%%DISPLAYPATH%%', displaypath).replace('%%ITEMS%%', items_html)
 
         encoded = content.encode('utf-8')
         self.send_response(200)
-        self.send_header("Content-type", "text/html; charset=utf-8")
-        self.send_header("Content-Length", str(len(encoded)))
+        self.send_header('Content-type', 'text/html; charset=utf-8')
+        self.send_header('Content-Length', str(len(encoded)))
         self.end_headers()
         self.wfile.write(encoded)
         return None
@@ -45,7 +55,6 @@ class MediaHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         path = self.translate_path(self.path)
         if os.path.isfile(path) and self.headers.get('Range'):
-            # 这里保留你原有的高性能流媒体传输逻辑
             size = os.path.getsize(path)
             range_h = self.headers.get('Range')
             m = re.search(r'bytes=(\d+)-(\d*)', range_h)
@@ -63,20 +72,21 @@ class MediaHandler(SimpleHTTPRequestHandler):
                     remaining = end - start + 1
                     while remaining > 0:
                         chunk = f.read(min(128 * 1024, remaining))
-                        if not chunk: break
+                        if not chunk:
+                            break
                         self.wfile.write(chunk)
                         remaining -= len(chunk)
                 return
         return super().do_GET()
 
+
 class ThreadedServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
     allow_reuse_address = True
-    def handle_error(self, request, client_address): pass
+
+    def handle_error(self, request, client_address):
+        pass
+
     def server_bind(self):
         super().server_bind()
         self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-if __name__ == "__main__":
-    print("http://localhost:80")
-    print(get_ip.get_ip())
-    ThreadedServer(('0.0.0.0', 80), MediaHandler).serve_forever()
