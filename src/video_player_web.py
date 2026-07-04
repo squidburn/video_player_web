@@ -1,6 +1,8 @@
+import include.py_get_ip as get_ip
 import os, re, socket, html
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from socketserver import ThreadingMixIn
+import socket
 
 class MediaHandler(SimpleHTTPRequestHandler):
     def log_message(self, format, *args): pass
@@ -85,5 +87,6 @@ class ThreadedServer(ThreadingMixIn, HTTPServer):
         super().server_bind()
         self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 if __name__ == "__main__":
-    print("Server: http://localhost:8000")
-    ThreadedServer(('0.0.0.0', 8000), MediaHandler).serve_forever()
+    print("http://localhost:80")
+    print(get_ip.get_ip())
+    ThreadedServer(('0.0.0.0', 80), MediaHandler).serve_forever()

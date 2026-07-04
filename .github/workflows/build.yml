@@ -28,7 +28,7 @@ jobs:
 
             - name: 4. 执行 PyInstaller 打包
               run: |
-                  pyinstaller --onefile video_player_web.py
+                  pyinstaller --onefile src\video_player_web.py
 
             # 替换了原来的第 5 步，直接发布到 Release 页面
             - name: 5. 自动创建 GitHub Release 并上传 EXE
