@@ -13,38 +13,28 @@ class MediaHandler(SimpleHTTPRequestHandler):
         except OSError:
             self.send_error(404, "No permission")
             return None
-        
+
         list_dir.sort(key=lambda a: (not os.path.isdir(os.path.join(path, a)), a.lower()))
-        
+
         displaypath = html.escape(self.path)
-        r = []
-        r.append('<html><head><meta charset="utf-8"><title>File Server</title>')
-        r.append('''<style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-                   background: #0f172a; color: #e2e8f0; margin: 0; padding: 40px; }
-            .container { max-width: 800px; margin: 0 auto; background: #1e293b; 
-                         padding: 20px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); }
-            h1 { font-size: 1.25rem; color: #38bdf8; margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #334155; }
-            ul { list-style: none; padding: 0; }
-            li { padding: 12px 0; border-bottom: 1px solid #334155; transition: background 0.2s; }
-            li:last-child { border-bottom: none; }
-            a { color: #f1f5f9; text-decoration: none; display: flex; align-items: center; }
-            a:hover { color: #38bdf8; }
-            .icon { margin-right: 12px; font-size: 1.2rem; }
-        </style></head><body><div class="container">''')
-        
-        r.append(f'<h1>Index of {displaypath}</h1><ul>')
-        
+
+        # 构造列表项 HTML
+        items = []
         for name in list_dir:
             fullname = os.path.join(path, name)
             is_dir = os.path.isdir(fullname)
             icon = "📁" if is_dir else "📄"
-            r.append(f'<li><a href="{html.escape(name)}{"/" if is_dir else ""}">'
-                     f'<span class="icon">{icon}</span>{name}</a></li>')
-            
-        r.append('</ul></div></body></html>')
-        
-        encoded = '\n'.join(r).encode('utf-8')
+            href = html.escape(name) + ("/" if is_dir else "")
+            items.append(f'<li><a href="{href}"><span class="icon">{icon}</span>{html.escape(name)}</a></li>')
+        items_html = '\n'.join(items)
+
+        # 从模板加载页面（模板保存在 src/templates/list_directory.html）
+        tpl_path = os.path.join(os.path.dirname(__file__), 'templates', 'list_directory.html')
+        with open(tpl_path, 'r', encoding='utf-8') as f:
+            tpl = f.read()
+        content = tpl.replace('%%DISPLAYPATH%%', displaypath).replace('%%ITEMS%%', items_html)
+
+        encoded = content.encode('utf-8')
         self.send_response(200)
         self.send_header("Content-type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(encoded)))
