@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-test:
-    runs-on: ubuntu-latest  # 为了兼容本地 act 运行，生产建议用 windows-latest
+    runs-on: windows-latest  # 为了兼容本地 act 运行，生产建议用 windows-latest
 
     steps:
       - name: 1. 拉取仓库代码
