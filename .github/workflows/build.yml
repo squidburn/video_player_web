@@ -1,0 +1,36 @@
+name: Build Python to EXE
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest # 在预装了 Windows 的虚拟机中运行
+
+    steps:
+    - name: 1. 拉取仓库代码
+      uses: actions/checkout@v4
+
+    - name: 2. 设置 Python 环境
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12.4' # 替换为你开发时使用的 Python 版本
+
+    - name: 3. 安装依赖库和 PyInstaller
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+        # 如果你的项目有 requirements.txt，取消下面这行的注释
+        # pip install -r requirements.txt
+
+    - name: 4. 执行 PyInstaller 打包
+      run: |
+        pyinstaller --onefile video_player_web.py 
+
+    - name: 5. 上传打包好的 EXE 文件
+      uses: actions/upload-artifact@v4
+      with:
+        name: video-player-web # 下载时的压缩包名称
+        path: dist/*.exe    # 上传 dist 目录下的所有 exe 文件
