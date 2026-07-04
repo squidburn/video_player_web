@@ -32,7 +32,7 @@ jobs:
           pyinstaller --clean --onefile --paths src --add-data "src/video_player_web/templates;video_player_web/templates" src/video_player_web/main.py
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2.1.0
+        uses: softprops/action-gh-release@v3.0.1
         with:
           files: dist/*.exe
         env:
