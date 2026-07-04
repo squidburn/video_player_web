@@ -1,39 +1,40 @@
 name: Build Python to EXE
 
 on:
-    push:
-        tags:
-            - "v*"
+  push:
+    tags:
+      - "v*"
 
 jobs:
-    build-windows:
-        runs-on: windows-latest
+  build-test:
+    runs-on: windows-latest # 为了兼容本地 act 运行，生产建议用 windows-latest
 
-        permissions:
-            contents: write
+    permissions:
+      contents: write
 
-        steps:
-            - name: 1. 拉取仓库代码
-              uses: actions/checkout@v4
+    steps:
+      - name: 1. 拉取仓库代码
+        uses: actions/checkout@v4.1.1
 
-            - name: 2. 设置 Python 环境
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.12.4"
+      - name: 2. 设置 Python 环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.4"
 
-            - name: 3. 安装 PyInstaller
-              run: |
-                  python -m pip install --upgrade pip
-                  pip install pyinstaller
+      - name: 3. 安装依赖与 PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          if (Test-Path requirements.txt) { pip install -r requirements.txt }
 
-            - name: 4. 执行 PyInstaller 打包
-              run: |
-                  pyinstaller --onefile src/video_player_web.py
+      - name: 4. 执行 PyInstaller 打包
+        run: |
+          pyinstaller --onefile src/video_player_web.py
 
-            # 替换了原来的第 5 步，直接发布到 Release 页面
-            - name: 5. 自动创建 GitHub Release 并上传 EXE
-              uses: softprops/action-gh-release@v2
-              with:
-                  files: dist/*.exe
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # 替换了原来的第 5 步，直接发布到 Release 页面
+      - name: 5. 自动创建 GitHub Release 并上传 EXE
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

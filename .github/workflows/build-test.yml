@@ -21,12 +21,11 @@ jobs:
       - name: 3. 安装依赖与 PyInstaller
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pyinstaller
+          if (Test-Path requirements.txt) { pip install -r requirements.txt }
 
       - name: 4. 执行 PyInstaller 打包
         run: |
-          # 注意：Linux 路径使用正斜杠 /，如果在本地 act (Linux) 运行需如此
           pyinstaller --onefile src/video_player_web.py
 
       - name: 5. 上传打包文件到 Actions 制品库
