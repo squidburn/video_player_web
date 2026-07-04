@@ -28,8 +28,8 @@ jobs:
         run: |
           pyinstaller --onefile src/video_player_web.py
 
-      - name: 5. 上传打包文件到 Actions 制品库
+      - name: 5. 上传打包好的 EXE 文件
         uses: actions/upload-artifact@v4
         with:
-          name: video-player-test-exe
-          path: dist/*
+          name: my-python-app # 下载时的压缩包名称
+          path: dist/*.exe    # 上传 dist 目录下的所有 exe 文件
