@@ -84,7 +84,6 @@ class ThreadedServer(ThreadingMixIn, HTTPServer):
     def server_bind(self):
         super().server_bind()
         self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-
 if __name__ == "__main__":
     print("Server: http://localhost:8000")
     ThreadedServer(('0.0.0.0', 8000), MediaHandler).serve_forever()
