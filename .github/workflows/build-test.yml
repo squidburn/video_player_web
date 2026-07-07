@@ -32,7 +32,7 @@ jobs:
           pyinstaller --clean --onefile --paths src --add-data "src/video_player_web/templates;video_player_web/templates" src/video_player_web/main.py
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: video-player-web-exe
           path: dist/*.exe
